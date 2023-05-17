@@ -1,20 +1,58 @@
 const venom = require('venom-bot');
-const session = 'session-name1';
+const SESSION_NAME = 'session-name1';
+const LADA = '521';
+const END = '@c.us'
 
 let client = undefined;
 
 venom
-  .create({ session: session,})
+  .create({ session: SESSION_NAME,})
   .then((c) => client = c)
   .catch((erro) => console.log(erro));
 
-sendText = async (phone, text) => {
-  if(!client) {
-	  return {result: true, message: "", data: null};
-  }
+
+sendText = async (phone, message) => {
+  if(!client) return {result: false, message: "El cliente de venom no se ha cargado.", data: null};
+  if(!phone) return {result: false, message: "No se ingreso el parámetro phone.", data: null};
+  if(!message) return {result: false, message: "No se ingreso el parámetro message.", data: null};
 
   try {
-    const result = await client.sendText(phone, text);
+    const result = await client.sendText(phone + END, message);
+    console.log('Result: ', result); 
+    return {result: true, message: "", data: result};
+  } catch (e) {
+    console.error('Error when sending: ', e); 
+    return {result: false, message: e.text, data: e};
+  }
+}
+const formatFile = (file, file_name) => {
+  const PDF = 'data:application/pdf;base64,';
+  const PNG = 'data:image/png;base64,';
+  const JPG = 'data:image/jpeg;base64,';
+  const BMP = 'data:image/bmp;base64';
+
+  if((file_name.toString().toLowerCase().endsWith('.pdf')) && !file.startsWith(PDF)) return PDF+file
+  if((file_name.toString().toLowerCase().endsWith('.png')) && !file.startsWith(PNG)) return PNG+file
+  if((file_name.toString().toLowerCase().endsWith('.jpeg')) && !file.startsWith(JPG)) return JPG+file
+  if((file_name.toString().toLowerCase().endsWith('.jpg')) && !file.startsWith(JPG)) return JPG+file
+  if((file_name.toString().toLowerCase().endsWith('.bmp')) && !file.startsWith(BMP)) return BMP+file
+
+  return file;
+}
+
+sendFileFromBase64 = async (phone, file, file_name, message) => {
+  if(!client) return {result: false, message: "El cliente de venom no se ha cargado.", data: null};
+  if(!phone) return {result: false, message: "No se ingreso el parámetro phone.", data: null};
+  if(!message) message="";
+  if(!file) return {result: false, message: "No se ingreso el parámetro file.", data: null};
+  if(!file_name) return {result: false, message: "No se ingreso el parámetro file_name.", data: null};
+
+  file = formatFile(file, file_name);
+  console.log(file_name)
+  console.log(file)
+
+  try {
+    const result = await client.sendFileFromBase64(phone + END, file, file_name, message);
     console.log('Result: ', result); 
     return {result: true, message: "", data: result};
   } catch (e) {
@@ -23,4 +61,4 @@ sendText = async (phone, text) => {
   }
 }
 
-module.exports = {sendText}
+module.exports = {sendText, sendFileFromBase64}
