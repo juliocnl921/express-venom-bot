@@ -1,25 +1,25 @@
-const express = require('express')
-const sender = require('./sender');
+import express, { json } from 'express';
+import { sendText, sendFileFromBase64 } from './sender';
 
 const app = express();
-app.use(express.json({limit: "50mb"}));
+app.use(json({limit: "50mb"}));
 
 const port = 3000;
 
 app.get('/enviar', async (req, res) => {
-  const result = await sender.sendText(req.query)
+  const result = await sendText(req.query)
 
   res.send(result);
 });
 
 app.post('/send_whatsapp', async (req, res) => {
-  const result = await sender.sendText(req.body)
+  const result = await sendText(req.body)
 
   res.send(result);
 });
 
 app.post('/send_whatsapp_with_file', async (req, res) => {
-  const result = await sender.sendFileFromBase64(req.body)
+  const result = await sendFileFromBase64(req.body)
 
   res.send(result);
 });

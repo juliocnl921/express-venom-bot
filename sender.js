@@ -1,4 +1,4 @@
-const venom = require('venom-bot');
+import { create } from 'venom-bot';
 
 const SESSION_NAME = 'session-name1';
 const END = '@c.us';
@@ -9,8 +9,7 @@ const BMP = 'data:image/bmp;base64';
 
 let client = undefined;
 
-venom
-  .create({ session: SESSION_NAME,})
+create({ session: SESSION_NAME,})
   .then((c) => client = c)
   .catch((erro) => console.log(erro));
 
@@ -67,4 +66,4 @@ const sendFileFromBase64 = async ({phone, file, file_name, message}) => {
   }
 }
 
-module.exports = {sendText, sendFileFromBase64}
+export default {sendText, sendFileFromBase64}
