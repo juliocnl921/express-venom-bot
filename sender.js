@@ -1,7 +1,11 @@
 const venom = require('venom-bot');
+
 const SESSION_NAME = 'session-name1';
-const LADA = '521';
-const END = '@c.us'
+const END = '@c.us';
+const PDF = 'data:application/pdf;base64,';
+const PNG = 'data:image/png;base64,';
+const JPG = 'data:image/jpeg;base64,';
+const BMP = 'data:image/bmp;base64';
 
 let client = undefined;
 
@@ -10,14 +14,31 @@ venom
   .then((c) => client = c)
   .catch((erro) => console.log(erro));
 
+const addMimeType = (file, file_name) => {
+  const normalizedType = file_name.toString().toLowerCase();
+  
+  if(normalizedType.endsWith('.pdf')  && !file.startsWith(PDF)) return PDF + file;
+  if(normalizedType.endsWith('.png')  && !file.startsWith(PNG)) return PNG + file;
+  if(normalizedType.endsWith('.jpeg') && !file.startsWith(JPG)) return JPG + file;
+  if(normalizedType.endsWith('.jpg')  && !file.startsWith(JPG)) return JPG + file;
+  if(normalizedType.endsWith('.bmp')  && !file.startsWith(BMP)) return BMP + file;
 
-sendText = async (phone, message) => {
+  return file;
+}
+
+const normalizePhone = (phone) => {
+    return phone.replace("-", "").replace(" ", "").replace("(", "").replace(")", "").replace("+", "");
+}
+
+const sendText = async ({phone, message}) => {
   if(!client) return {result: false, message: "El cliente de venom no se ha cargado.", data: null};
   if(!phone) return {result: false, message: "No se ingreso el parámetro phone.", data: null};
   if(!message) return {result: false, message: "No se ingreso el parámetro message.", data: null};
 
+  phone = normalizePhone(phone) + END;
+
   try {
-    const result = await client.sendText(phone + END, message);
+    const result = await client.sendText(phone, message);
     console.log('Result: ', result); 
     return {result: true, message: "", data: result};
   } catch (e) {
@@ -25,34 +46,19 @@ sendText = async (phone, message) => {
     return {result: false, message: e.text, data: e};
   }
 }
-const formatFile = (file, file_name) => {
-  const PDF = 'data:application/pdf;base64,';
-  const PNG = 'data:image/png;base64,';
-  const JPG = 'data:image/jpeg;base64,';
-  const BMP = 'data:image/bmp;base64';
 
-  if((file_name.toString().toLowerCase().endsWith('.pdf')) && !file.startsWith(PDF)) return PDF+file
-  if((file_name.toString().toLowerCase().endsWith('.png')) && !file.startsWith(PNG)) return PNG+file
-  if((file_name.toString().toLowerCase().endsWith('.jpeg')) && !file.startsWith(JPG)) return JPG+file
-  if((file_name.toString().toLowerCase().endsWith('.jpg')) && !file.startsWith(JPG)) return JPG+file
-  if((file_name.toString().toLowerCase().endsWith('.bmp')) && !file.startsWith(BMP)) return BMP+file
-
-  return file;
-}
-
-sendFileFromBase64 = async (phone, file, file_name, message) => {
+const sendFileFromBase64 = async ({phone, file, file_name, message}) => {
   if(!client) return {result: false, message: "El cliente de venom no se ha cargado.", data: null};
   if(!phone) return {result: false, message: "No se ingreso el parámetro phone.", data: null};
-  if(!message) message="";
   if(!file) return {result: false, message: "No se ingreso el parámetro file.", data: null};
   if(!file_name) return {result: false, message: "No se ingreso el parámetro file_name.", data: null};
 
-  file = formatFile(file, file_name);
-  console.log(file_name)
-  console.log(file)
-
+  phone = normalizePhone(phone) + END;
+  message= (!message) ? message : "";
+  file = addMimeType(file, file_name);
+  
   try {
-    const result = await client.sendFileFromBase64(phone + END, file, file_name, message);
+    const result = await client.sendFileFromBase64(phone, file, file_name, message);
     console.log('Result: ', result); 
     return {result: true, message: "", data: result};
   } catch (e) {
