@@ -1,5 +1,6 @@
 import express, { json } from 'express';
-import { sendText, sendFileFromBase64 } from './sender';
+
+import {sendText, sendFileFromBase64} from './sender.js';
 
 const app = express();
 app.use(json({limit: "50mb"}));
@@ -8,19 +9,16 @@ const port = 3000;
 
 app.get('/enviar', async (req, res) => {
   const result = await sendText(req.query)
-
   res.send(result);
 });
 
 app.post('/send_whatsapp', async (req, res) => {
   const result = await sendText(req.body)
-
   res.send(result);
 });
 
 app.post('/send_whatsapp_with_file', async (req, res) => {
   const result = await sendFileFromBase64(req.body)
-
   res.send(result);
 });
 

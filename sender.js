@@ -1,6 +1,6 @@
 import { create } from 'venom-bot';
 
-const SESSION_NAME = 'session-name1';
+const SESSION_NAME = 'hcc-mensajeria-25a13d54f8a';
 const END = '@c.us';
 const PDF = 'data:application/pdf;base64,';
 const PNG = 'data:image/png;base64,';
@@ -8,10 +8,13 @@ const JPG = 'data:image/jpeg;base64,';
 const BMP = 'data:image/bmp;base64';
 
 let client = undefined;
+try{
+  create({ session: SESSION_NAME,})
+    .then((c) => client = c)
+    .catch((erro) => console.log(erro));}
+catch(e)
+{console.error('Error when creating session: ', e);}
 
-create({ session: SESSION_NAME,})
-  .then((c) => client = c)
-  .catch((erro) => console.log(erro));
 
 const addMimeType = (file, file_name) => {
   const normalizedType = file_name.toString().toLowerCase();
@@ -37,12 +40,13 @@ const sendText = async ({phone, message}) => {
   phone = normalizePhone(phone) + END;
 
   try {
-    const result = await client.sendText(phone, message);
-    console.log('Result: ', result); 
-    return {result: true, message: "", data: result};
+    const a = await client.sendText(phone, message);
+    console.log( { result: true, message: "Mensaje enviado", data: a}); 
+    return {result: true, message: "Mensaje enviado"};
+    
   } catch (e) {
     console.error('Error when sending: ', e); 
-    return {result: false, message: e.text, data: e};
+    return {result: false, message: e.text};
   }
 }
 
@@ -57,13 +61,13 @@ const sendFileFromBase64 = async ({phone, file, file_name, message}) => {
   file = addMimeType(file, file_name);
   
   try {
-    const result = await client.sendFileFromBase64(phone, file, file_name, message);
-    console.log('Result: ', result); 
-    return {result: true, message: "", data: result};
+    await client.sendFileFromBase64(phone, file, file_name, message);
+    console.log( { result: true, message: "Mensaje enviado"}); 
+    return {result: true, message: "Mensaje enviado con archivo"};
   } catch (e) {
     console.error('Error when sending: ', e); 
-    return {result: false, message: e.text, data: e};
+    return {result: false, message: e.text};
   }
 }
 
-export default {sendText, sendFileFromBase64}
+export {sendText, sendFileFromBase64}
